@@ -1,0 +1,24 @@
+*{
+    background-color: rgb(50, 50, 50);
+}
+#canvas {
+    background-color: #cccccc;
+    border: 50px solid rgb(177, 138, 81);
+    position: absolute;
+    top: 20%;
+    right: 22%;
+  }
+  .ping{
+    position: absolute;
+    left: 41%;
+    
+    text-align: center;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    font-style: italic;
+    font-size: 70px;
+    color: whitesmoke;
+    position: absolute;
+
+  }
+
+  

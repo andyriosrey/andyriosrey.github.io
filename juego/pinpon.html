@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="./css.css">
+</head>
+<body>
+    <h1 class="ping">PING PONG</h1>
+
+
+    <canvas id="canvas" width="1000" height="400" tabindex="1"></canvas>
+
+  <script>
+
+var canvas = document.getElementById('canvas');
+var context = canvas.getContext('2d');
+
+
+var W = 87;
+var S = 83;
+var ARRIBA = 38;
+var ABAJO = 40;
+
+var keys = {
+  W: false,
+  S: false,
+  ARRIBA: false,
+  ABAJO: false
+};
+
+function makeRect(x, y, width, height, speed, color) {
+  if (!color) color = '#fdfffc';
+  return {
+    x: x,
+    y: y,
+    w: width,
+    h: height,
+    s: speed,
+    c: color,
+    draw: function() {
+      context.fillStyle = this.c;
+      context.fillRect(this.x, this.y, this.w, this.h);
+    }
+  };
+}
+
+
+var paddleWidth = 15;
+var paddleHeight = 100;
+var leftPaddle = makeRect(25, canvas.height / 2 - paddleHeight / 2, paddleWidth, paddleHeight, 5, '#16bd00');
+var rightPaddle = makeRect(canvas.width - paddleWidth - 25, canvas.height / 2 - paddleHeight / 2, paddleWidth, paddleHeight, 5, '#c000a6');
+
+
+var leftScore = 0;
+var rightScore = 0;
+
+
+var ballLength = 15;
+var ballSpeed = 1.4;
+var ball = makeRect(0, 0, ballLength, ballLength, ballSpeed, '#1effe1');
+
+
+ball.sX = ballSpeed;
+ball.sY = ballSpeed / 1;
+
+
+if (Math.random() > 0.01) {
+  ball.sX *= -0.3;
+}
+
+if (Math.random() > 0.01) {
+  ball.sY *= -0.3;
+}
+
+
+function resetBall() {
+  ball.x = canvas.width / 2 - ball.w / 2;
+  ball.y = canvas.height / 2 - ball.w / 2;
+  ball.sX = ballSpeed;
+  ball.sY = ballSpeed / 2;
+}
+
+
+function bounceBall() {
+
+	if (ball.sX > 0) {
+  	ball.sX += 1;
+ 
+    if (keys.ARRIBA) {
+      ball.sY -= 1;
+    } else if (keys.ABAJO) {
+      ball.sY += 1;
+    }
+  } else {
+  	ball.sX -= 1;
+
+    if (keys.W) {
+      ball.sY -= 1;
+    } else if (keys.S) {
+      ball.sY += 1
+    }
+  }
+  ball.sX *= -1;
+}
+
+
+canvas.addEventListener('keydown', function(e) {
+  if (e.keyCode === W) {
+    keys.W = true;
+  }
+  if (e.keyCode === S) {
+    keys.S = true;
+  }
+  if (e.keyCode === ARRIBA) {
+    keys.ARRIBA = true;
+  }
+  if (e.keyCode === ABAJO) {
+    keys.ABAJO = true;
+  }
+});
+
+
+canvas.addEventListener('keyup', function(e) {
+  if (e.keyCode === W) {
+    keys.W = false;
+  }
+  if (e.keyCode === S) {
+    keys.S = false;
+  }
+  if (e.keyCode === ARRIBA) {
+    keys.ARRIBA = false;
+  }
+  if (e.keyCode === ABAJO) {
+    keys.ABAJO = false;
+  }
+});
+
+function menu() {
+  erase();
+ 
+  context.fillStyle = '#fdfffc';
+  context.font = '24px Arial';
+  context.textAlign = 'center';
+  context.fillText('PING - PONG', canvas.width / 2, canvas.height / 4);
+  context.font = '18px Arial';
+  context.fillText('Haga Click para empezar', canvas.width / 2, canvas.height / 3);
+  context.font = '14px Arial';
+  context.textAlign = 'left';
+  context.fillText('Jugador 1: W - Arriba y S - Abajo ', 5, (canvas.height / 3) * 2);
+  context.textAlign = 'right';
+  context.fillText('Player 2: UP Arriba and DOWN Abajo', canvas.width - 5, (canvas.height / 3) * 2);
+
+  canvas.addEventListener('click', startGame);
+
+}
+
+
+function startGame() {
+
+  canvas.removeEventListener('click', startGame);
+
+  resetBall();
+
+  draw();
+}
+
+function endGame() {
+	erase();
+  context.fillStyle = '#0be2ff';
+  context.font = '24px Arial';
+  context.textAlign = 'center';
+  var winner = 1;
+  if (rightScore === 10) winner = 2;
+  context.fillText('Jugador ' + winner + ' ¡Gano! ', canvas.width/2, canvas.height/2);
+}
+
+function erase() {
+    
+  context.fillStyle = '#4b4134';
+  context.fillRect(0, 0, canvas.width, canvas.height);
+}
+
+function draw() {
+  erase();
+  if (keys.W) {
+    leftPaddle.y -= leftPaddle.s;
+  }
+  if (keys.S) {
+    leftPaddle.y += leftPaddle.s;
+  }
+  if (keys.ARRIBA) {
+    rightPaddle.y -= rightPaddle.s;
+  }
+  if (keys.ABAJO) {
+    rightPaddle.y += rightPaddle.s;
+  }
+  ball.x += ball.sX;
+  ball.y += ball.sY;
+
+  if (ball.y < 0 || ball.y + ball.h > canvas.height) {
+    ball.sY *= -1;
+  }
+
+  [leftPaddle, rightPaddle].forEach(function(paddle) {
+    if (paddle.y < 0) {
+      paddle.y = 0;
+    } 
+    if (paddle.y + paddle.h > canvas.height) {
+      paddle.y = canvas.height - paddle.h;
+    }
+  });
+
+  if (ball.y + ball.h/2 >= leftPaddle.y && ball.y + ball.h/2 <= leftPaddle.y + leftPaddle.h) {
+    if (ball.x <= leftPaddle.x + leftPaddle.w) {
+      bounceBall();
+    }
+  } 
+  if (ball.y + ball.h/2 >= rightPaddle.y && ball.y + ball.h/2 <= rightPaddle.y + rightPaddle.h) {
+    if (ball.x + ball.w >= rightPaddle.x) {
+      bounceBall();
+    }
+  }
+
+  if (ball.x < leftPaddle.x) {
+    rightScore++;
+    resetBall();
+    ball.sX *= -1;
+  } else if (ball.x + ball.w > rightPaddle.x + rightPaddle.w) {
+    leftScore++;
+    resetBall();
+    ball.sX *= -1;
+  }
+
+  leftPaddle.draw();
+  rightPaddle.draw();
+  ball.draw();
+
+  context.fillStyle = '#e9d5b7';
+  context.font = '24px Arial';
+  context.textAlign = 'left';
+  context.fillText('Puntos: ' + leftScore, 5, 24);
+  context.textAlign = 'right';
+  context.fillText('Puntos: ' + rightScore, canvas.width - 5, 24);
+
+  if (leftScore === 5 || rightScore === 5) {
+  	endGame();
+  } else {
+  	window.requestAnimationFrame(draw);
+  }
+}
+
+
+menu();
+canvas.focus();
+
+    </script>
+    
+</body>
+</html>
